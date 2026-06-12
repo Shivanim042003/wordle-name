@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Guess The Baby's Name 👶</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+<style>
+  :root {
+    --bg: #fff8f0;
+    --surface: #ffffff;
+    --correct: #4caf83;
+    --present: #f5a623;
+    --absent: #b0adb8;
+    --tile-border: #ddd0c8;
+    --text: #2d1f3d;
+    --accent: #ff6b9d;
+    --accent2: #a78bfa;
+    --key-bg: #ede8f5;
+    --key-text: #2d1f3d;
+    --shadow: rgba(167,139,250,0.18);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,107,157,0.10) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(167,139,250,0.13) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(245,166,35,0.07) 0%, transparent 60%);
+  }
+
+  header {
+    width: 100%;
+    max-width: 700px;
+    padding: 18px 20px 10px;
+    text-align: center;
+  }
+
+  .baby-emoji {
+    font-size: 2.2rem;
+    animation: bounce 1.8s infinite;
+    display: inline-block;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    line-height: 1.25;
+    text-shadow: 2px 2px 0px rgba(255,107,157,0.15);
+  }
+
+  .divider {
+    width: 100%;
+    max-width: 520px;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--accent2),
+      var(--accent),
+      transparent
+    );
+    border: none;
+    margin: 4px 0 10px;
+    opacity: 0.35;
+  }
+
+  #message-bar {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.03em;
+    transition: opacity 0.3s;
+    min-width: 300px;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    gap: 7px;
+    padding: 6px 0 14px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+  }
+
+  .tile {
+    width: 58px;
+    height: 58px;
+    border: 2.5px solid var(--tile-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.75rem;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s, transform 0.1s;
+    user-select: none;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .tile.filled {
+    border-color: var(--accent2);
+    transform: scale(1.06);
+  }
+
+  .tile.revealed {
+    transform: none;
+    color: #fff;
+    border: none;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+  }
+
+  .tile.correct {
+    background: var(--correct);
+  }
+
+  .tile.present {
+    background: var(--present);
+  }
+
+  .tile.absent {
+    background: var(--absent);
+  }
+
+  .tile.flip {
+    animation: flip 0.5s ease forwards;
+  }
+
+  @keyframes flip {
+    0% {
+      transform: rotateX(0deg);
+    }
+    50% {
+      transform: rotateX(-90deg);
+      opacity: 0.6;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+
+  .tile.shake {
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-6px);
+    }
+    40% {
+      transform: translateX(6px);
+    }
+    60% {
+      transform: translateX(-4px);
+    }
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .tile.bounce-win {
+    animation: bounceWin 0.5s ease forwards;
+  }
+
+  @keyframes bounceWin {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.25) rotate(-4deg);
+    }
+    70% {
+      transform: scale(0.95) rotate(2deg);
+    }
+    100% {
+      transform: scale(1.1);
+    }
+  }
+
+  #keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    align-items: center;
+    padding-bottom: 18px;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .kb-row {
+    display: flex;
+    gap: 5px;
+  }
+
+  .key {
+    height: 50px;
+    min-width: 36px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: none;
+    background: var(--key-bg);
+    color: var(--key-text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px var(--shadow);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .key:active {
+    transform: scale(0.93);
+  }
+
+  .key.wide {
+    min-width: 56px;
+    font-size: 0.78rem;
+    padding: 0 6px;
+  }
+
+  .key.correct {
+    background: var(--correct);
+    color: #fff;
+  }
+
+  .key.present {
+    background: var(--present);
+    color: #fff;
+  }
+
+  .key.absent {
+    background: var(--absent);
+    color: #fff;
+  }
+
+  @media (max-width: 400px) {
+    .tile {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      border-radius: 10px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+    }
+
+    .key {
+      height: 44px;
+      min-width: 30px;
+      font-size: 0.9rem;
+    }
+
+    .key.wide {
+      min-width: 46px;
+    }
+  }
+
+/* Celebration Modal */
+
+#celebrationModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(45,31,61,0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.celebration-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: popIn 0.5s ease;
+}
+
+.celebration-card h2 {
+  font-family: 'Fredoka One', cursive;
+  color: var(--accent);
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.baby-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 15px 0;
+}
+
+.baby-details {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #666;
+}
+
+.celebration-emoji {
+  font-size: 4rem;
+  margin-bottom: 15px;
+}
+
+.close-btn {
+  margin-top: 25px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: fall linear forwards;
+  z-index: 10000;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="baby-emoji">👶</div>
+
+  <h1>
+    Guess the name of Kriti and Saurabh's baby boy Wordle-style
+  </h1>
+</header>
+
+<hr class="divider"/>
+
+<div id="message-bar"></div>
+
+<div id="grid"></div>
+
+<div id="keyboard"></div>
+
+<script>
+  const WORD = "IVAAN";
+  const MAX_ROWS = 6;
+  const COLS = 5;
+
+  let currentRow = 0;
+  let currentCol = 0;
+  let currentGuess = [];
+  let gameOver = false;
+
+  let board = [];
+  let keyMap = {};
+
+  const grid = document.getElementById('grid');
+
+  for (let r = 0; r < MAX_ROWS; r++) {
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
+
+    const rowTiles = [];
+
+    for (let c = 0; c < COLS; c++) {
+
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+
+      rowEl.appendChild(tile);
+      rowTiles.push(tile);
+    }
+
+    grid.appendChild(rowEl);
+    board.push(rowTiles);
+  }
+
+  const kbLayout = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['ENTER','Z','X','C','V','B','N','M','⌫']
+  ];
+
+  const kbEl = document.getElementById('keyboard');
+
+  kbLayout.forEach(row => {
+
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'kb-row';
+
+    row.forEach(k => {
+
+      const btn = document.createElement('button');
+
+      btn.className =
+        'key' + (k === 'ENTER' || k === '⌫' ? ' wide' : '');
+
+      btn.textContent = k;
+
+      btn.addEventListener('click', () => handleKey(k));
+
+      rowDiv.appendChild(btn);
+
+      keyMap[k] = {
+        el: btn,
+        state: ''
+      };
+    });
+
+    kbEl.appendChild(rowDiv);
+  });
+
+  document.addEventListener('keydown', e => {
+
+    if (gameOver) return;
+
+    if (e.key === 'Enter') {
+      handleKey('ENTER');
+    }
+
+    else if (e.key === 'Backspace') {
+      handleKey('⌫');
+    }
+
+    else {
+      const l = e.key.toUpperCase();
+
+      if (/^[A-Z]$/.test(l)) {
+        handleKey(l);
+      }
+    }
+  });
+
+  function handleKey(k) {
+
+    if (gameOver) return;
+
+    if (k === '⌫') {
+      deleteLetter();
+    }
+
+    else if (k === 'ENTER') {
+      submitGuess();
+    }
+
+    else if (/^[A-Z]$/.test(k) && currentCol < COLS) {
+      addLetter(k);
+    }
+  }
+
+  function addLetter(l) {
+
+    const tile = board[currentRow][currentCol];
+
+    tile.textContent = l;
+    tile.classList.add('filled');
+
+    currentGuess.push(l);
+    currentCol++;
+  }
+
+  function deleteLetter() {
+
+    if (currentCol === 0) return;
+
+    currentCol--;
+    currentGuess.pop();
+
+    const tile = board[currentRow][currentCol];
+
+    tile.textContent = '';
+    tile.classList.remove('filled');
+  }
+
+  function showMessage(msg, duration = 1800) {
+
+    const bar = document.getElementById('message-bar');
+
+    bar.textContent = msg;
+    bar.style.opacity = 1;
+
+    if (duration > 0) {
+      setTimeout(() => {
+
+        bar.style.opacity = 0;
+
+        setTimeout(() => {
+          bar.textContent = '';
+        }, 350);
+
+      }, duration);
+    }
+  }
+
+  function submitGuess() {
+
+    if (currentCol < COLS) {
+
+      showMessage('Please enter 5 letters 👶');
+
+      shakeRow(currentRow);
+
+      return;
+    }
+
+    const guess = currentGuess.join('');
+
+    const result = evaluateGuess(guess);
+
+    result.forEach((state, i) => {
+
+      setTimeout(() => {
+
+        const tile = board[currentRow][i];
+
+        tile.classList.add('flip');
+
+        setTimeout(() => {
+
+          tile.classList.remove('filled');
+          tile.classList.add('revealed', state);
+
+          updateKey(currentGuess[i], state);
+
+        }, 250);
+
+      }, i * 110);
+    });
+
+    const totalDelay = (COLS - 1) * 110 + 520;
+
+    setTimeout(() => {
+
+      if (guess === WORD) {
+
+        gameOver = true;
+
+        board[currentRow].forEach((tile, i) => {
+          setTimeout(() => {
+            tile.classList.add('bounce-win');
+          }, i * 120);
+        });
+
+        setTimeout(() => {
+          showCelebration();
+        }, 900);
+      }
+
+      else if (currentRow === MAX_ROWS - 1) {
+
+        gameOver = true;
+
+        setTimeout(() => {
+          showCelebration();
+        }, 500);
+      }
+
+      currentRow++;
+      currentCol = 0;
+      currentGuess = [];
+
+    }, totalDelay);
+  }
+
+  function evaluateGuess(guess) {
+
+    const result = Array(COLS).fill('absent');
+
+    const wordArr = WORD.split('');
+    const guessArr = guess.split('');
+
+    const wordUsed = Array(COLS).fill(false);
+    const guessUsed = Array(COLS).fill(false);
+
+    for (let i = 0; i < COLS; i++) {
+
+      if (guessArr[i] === wordArr[i]) {
+
+        result[i] = 'correct';
+
+        wordUsed[i] = true;
+        guessUsed[i] = true;
+      }
+    }
+
+    for (let i = 0; i < COLS; i++) {
+
+      if (guessUsed[i]) continue;
+
+      for (let j = 0; j < COLS; j++) {
+
+        if (!wordUsed[j] && guessArr[i] === wordArr[j]) {
+
+          result[i] = 'present';
+
+          wordUsed[j] = true;
+
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  const stateRank = {
+    correct: 3,
+    present: 2,
+    absent: 1,
+    '': 0
+  };
+
+  function updateKey(letter, state) {
+
+    const entry = keyMap[letter];
+
+    if (!entry) return;
+
+    if (stateRank[state] > stateRank[entry.state]) {
+
+      entry.state = state;
+
+      entry.el.classList.remove(
+        'correct',
+        'present',
+        'absent'
+      );
+
+      entry.el.classList.add(state);
+    }
+  }
+
+  function shakeRow(row) {
+
+    board[row].forEach(tile => {
+
+      tile.classList.add('shake');
+
+      tile.addEventListener(
+        'animationend',
+        () => tile.classList.remove('shake'),
+        { once: true }
+      );
+    });
+  }
+
+function showCelebration() {
+  document.getElementById('celebrationModal').style.display = 'flex';
+  createConfetti();
+}
+
+function createConfetti() {
+  const colors = ['#ff6b9d','#a78bfa','#f5a623','#4caf83','#5ec8ff'];
+
+  for (let i = 0; i < 120; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (3 + Math.random() * 3) + 's';
+
+    document.body.appendChild(piece);
+
+    setTimeout(() => piece.remove(), 7000);
+  }
+}
+
+</script>
+
+
+<div id="celebrationModal">
+  <div class="celebration-card">
+    <div class="celebration-emoji">👶💙</div>
+    
+    <div class="baby-name">Ivaan Saurabh Mahadik</div>
+    <div class="baby-details">
+      May 29, 2026<br>
+      7 lbs 10 oz • 19 in
+    </div>
+</div>
+</div>
+
+</body>
+</html>
